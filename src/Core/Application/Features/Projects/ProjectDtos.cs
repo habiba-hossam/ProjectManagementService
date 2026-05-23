@@ -1,5 +1,22 @@
 namespace ProjectManagementAPI.Core.Application.Features.Projects;
 
-public record ProjectDto(Guid Id, string Name, string Description, DateTime CreatedAt, int TaskCount);
-public record CreateProjectRequest(string Name, string Description);
-public record UpdateProjectRequest(string Name, string Description);
+public class ProjectDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+    public int TaskCount { get; set; }
+}
+
+public class CreateProjectRequest
+{
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+}
+
+public class UpdateProjectRequest
+{
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+}

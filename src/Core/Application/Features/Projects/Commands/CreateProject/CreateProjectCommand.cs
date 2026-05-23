@@ -1,3 +1,4 @@
+using AutoMapper;
 using FluentValidation;
 using MediatR;
 using ProjectManagementAPI.Core.Application.Common.Interfaces;
@@ -25,12 +26,14 @@ public class CreateProjectCommandHandler : IRequestHandler<CreateProjectCommand,
     private readonly IProjectRepository _projectRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly ICacheService _cacheService;
+    private readonly IMapper _mapper;
 
-    public CreateProjectCommandHandler(IProjectRepository projectRepository, ICurrentUserService currentUserService, ICacheService cacheService)
+    public CreateProjectCommandHandler(IProjectRepository projectRepository, ICurrentUserService currentUserService, ICacheService cacheService, IMapper mapper)
     {
         _projectRepository = projectRepository;
         _currentUserService = currentUserService;
         _cacheService = cacheService;
+        _mapper = mapper;
     }
 
     public async Task<ProjectDto> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
@@ -44,6 +47,6 @@ public class CreateProjectCommandHandler : IRequestHandler<CreateProjectCommand,
 
         await _projectRepository.AddAsync(project, cancellationToken);
         await _cacheService.IncrementVersionAsync($"projects:user:{_currentUserService.UserId}:version");
-        return new ProjectDto(project.Id, project.Name, project.Description, project.CreatedAt, 0);
+        return _mapper.Map<ProjectDto>(project);
     }
 }

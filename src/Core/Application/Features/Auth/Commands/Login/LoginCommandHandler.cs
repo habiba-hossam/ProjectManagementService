@@ -1,3 +1,4 @@
+using AutoMapper;
 using FluentValidation;
 using MediatR;
 using ProjectManagementAPI.Core.Application.Common.Exceptions;
@@ -20,12 +21,13 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponseDto
     private readonly IUserRepository _userRepository;
     private readonly IPasswordService _passwordService;
     private readonly IJwtService _jwtService;
-
-    public LoginCommandHandler(IUserRepository userRepository, IPasswordService passwordService, IJwtService jwtService)
+    private readonly IMapper _mapper;
+    public LoginCommandHandler(IUserRepository userRepository, IPasswordService passwordService, IJwtService jwtService, IMapper mapper)
     {
         _userRepository = userRepository;
         _passwordService = passwordService;
         _jwtService = jwtService;
+        _mapper = mapper;
     }
 
     public async Task<AuthResponseDto> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -37,6 +39,6 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponseDto
             throw new UnauthorizedException("Invalid email or password.");
 
         var token = _jwtService.GenerateToken(user);
-        return new AuthResponseDto(user.Id, user.FullName, user.Email, token, user.Role);
+        return _mapper.Map<AuthResponseDto>(user, opt => opt.AfterMap((src, dest) => dest.Token = token));
     }
 }

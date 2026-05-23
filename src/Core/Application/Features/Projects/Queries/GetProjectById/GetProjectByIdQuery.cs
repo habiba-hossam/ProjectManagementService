@@ -1,3 +1,4 @@
+using AutoMapper;
 using MediatR;
 using ProjectManagementAPI.Core.Application.Common.Exceptions;
 using ProjectManagementAPI.Core.Application.Common.Interfaces;
@@ -12,12 +13,14 @@ public class GetProjectByIdQueryHandler : IRequestHandler<GetProjectByIdQuery, P
     private readonly IProjectRepository _projectRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly ICacheService _cacheService;
+    private readonly IMapper _mapper;
 
-    public GetProjectByIdQueryHandler(IProjectRepository projectRepository, ICurrentUserService currentUserService, ICacheService cacheService)
+    public GetProjectByIdQueryHandler(IProjectRepository projectRepository, ICurrentUserService currentUserService, ICacheService cacheService, IMapper mapper)
     {
         _projectRepository = projectRepository;
         _currentUserService = currentUserService;
         _cacheService = cacheService;
+        _mapper = mapper;
     }
 
     public async Task<ProjectDto> Handle(GetProjectByIdQuery request, CancellationToken cancellationToken)
@@ -30,7 +33,7 @@ public class GetProjectByIdQueryHandler : IRequestHandler<GetProjectByIdQuery, P
         var project = await _projectRepository.GetProjectByIdAndUserIdAsync(request.Id, _currentUserService.UserId, cancellationToken)
             ?? throw new NotFoundException(nameof(Project), request.Id);
 
-        var dto = new ProjectDto(project.Id, project.Name, project.Description, project.CreatedAt, project.Tasks.Count);
+        var dto = _mapper.Map<ProjectDto>(project);
         await _cacheService.SetAsync(cacheKey, dto, TimeSpan.FromMinutes(10), cancellationToken);
         return dto;
     }

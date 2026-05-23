@@ -1,3 +1,4 @@
+using AutoMapper;
 using MediatR;
 using ProjectManagementAPI.Core.Application.Common.Exceptions;
 using ProjectManagementAPI.Core.Application.Common.Interfaces;
@@ -13,12 +14,14 @@ public class GetTasksByProjectQueryHandler : IRequestHandler<GetTasksByProjectQu
     private readonly ITaskRepository _taskRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IMapper _mapper;
 
-    public GetTasksByProjectQueryHandler(ITaskRepository taskRepository, IProjectRepository projectRepository, ICurrentUserService currentUserService)
+    public GetTasksByProjectQueryHandler(ITaskRepository taskRepository, IProjectRepository projectRepository, ICurrentUserService currentUserService, IMapper mapper)
     {
         _taskRepository = taskRepository;
         _projectRepository = projectRepository;
         _currentUserService = currentUserService;
+        _mapper = mapper;
     }
 
     public async Task<PaginatedList<TaskDto>> Handle(GetTasksByProjectQuery request, CancellationToken cancellationToken)
@@ -32,21 +35,7 @@ public class GetTasksByProjectQueryHandler : IRequestHandler<GetTasksByProjectQu
 
         return new PaginatedList<TaskDto>
         {
-            Items = tasks.Items.Select(t => 
-            new TaskDto(
-                t.Id, 
-                t.Title, 
-                t.Description, 
-                t.Status,
-                t.Status.ToString(), 
-                t.DueDate, 
-                t.Priority,
-                t.Priority.ToString(), 
-                t.ProjectId, 
-                t.CreatedAt)),
-            TotalCount = tasks.TotalCount,
-            PageNumber = tasks.PageNumber,
-            PageSize = tasks.PageSize
+            Items = tasks.Items.Select(t => _mapper.Map<TaskDto>(t)).ToList()            
         };
     }
 }

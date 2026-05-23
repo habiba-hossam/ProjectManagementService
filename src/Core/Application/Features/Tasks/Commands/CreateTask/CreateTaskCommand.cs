@@ -1,3 +1,4 @@
+using AutoMapper;
 using FluentValidation;
 using MediatR;
 using ProjectManagementAPI.Core.Application.Common.Exceptions;
@@ -26,12 +27,14 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, TaskD
     private readonly ITaskRepository _taskRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IMapper _mapper;
 
-    public CreateTaskCommandHandler(ITaskRepository taskRepository, IProjectRepository projectRepository, ICurrentUserService currentUserService)
+    public CreateTaskCommandHandler(ITaskRepository taskRepository, IProjectRepository projectRepository, ICurrentUserService currentUserService, IMapper mapper    )
     {
         _taskRepository = taskRepository;
         _projectRepository = projectRepository;
         _currentUserService = currentUserService;
+        _mapper = mapper;
     }
 
     public async Task<TaskDto> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
@@ -52,11 +55,6 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, TaskD
 
         await _taskRepository.AddAsync(task, cancellationToken);
 
-        return MapToDto(task);
+        return _mapper.Map<TaskDto>(task);
     }
-
-    private static TaskDto MapToDto(ProjectTask task) =>
-        new(task.Id, task.Title, task.Description, task.Status,
-            task.Status.ToString(), task.DueDate, task.Priority,
-            task.Priority.ToString(), task.ProjectId, task.CreatedAt);
 }

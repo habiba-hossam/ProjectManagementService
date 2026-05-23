@@ -1,3 +1,4 @@
+using AutoMapper;
 using FluentValidation;
 using MediatR;
 using ProjectManagementAPI.Core.Application.Common.Exceptions;
@@ -26,12 +27,14 @@ public class UpdateProjectCommandHandler : IRequestHandler<UpdateProjectCommand,
     private readonly IProjectRepository _projectRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly ICacheService _cacheService;
+    private readonly IMapper _mapper;
 
-    public UpdateProjectCommandHandler(IProjectRepository projectRepository, ICurrentUserService currentUserService, ICacheService cacheService)
+    public UpdateProjectCommandHandler(IProjectRepository projectRepository, ICurrentUserService currentUserService, ICacheService cacheService, IMapper mapper)
     {
         _projectRepository = projectRepository;
         _currentUserService = currentUserService;
         _cacheService = cacheService;
+        _mapper = mapper;
     }
 
     public async Task<ProjectDto> Handle(UpdateProjectCommand request, CancellationToken cancellationToken)
@@ -47,6 +50,6 @@ public class UpdateProjectCommandHandler : IRequestHandler<UpdateProjectCommand,
         await _cacheService.RemoveAsync($"project:{request.Id}", cancellationToken);
         await _cacheService.IncrementVersionAsync($"projects:user:{_currentUserService.UserId}:version");
 
-        return new ProjectDto(project.Id, project.Name, project.Description, project.CreatedAt, project.Tasks.Count);
+        return _mapper.Map<ProjectDto>(project);
     }
 }

@@ -1,3 +1,4 @@
+using AutoMapper;
 using MediatR;
 using ProjectManagementAPI.Core.Application.Common.Interfaces;
 using ProjectManagementAPI.Core.Application.Common.Models;
@@ -11,13 +12,15 @@ public class GetAllProjectsQueryHandler : IRequestHandler<GetAllProjectsQuery, P
     private readonly IProjectRepository _projectRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly ICacheService _cacheService;
+    private readonly IMapper _mapper;
     
 
-    public GetAllProjectsQueryHandler(IProjectRepository projectRepository, ICurrentUserService currentUserService, ICacheService cacheService)
+    public GetAllProjectsQueryHandler(IProjectRepository projectRepository, ICurrentUserService currentUserService, ICacheService cacheService, IMapper mapper)
     {
         _projectRepository = projectRepository;
         _currentUserService = currentUserService;
         _cacheService = cacheService;
+        _mapper = mapper;
     }
 
     public async Task<PaginatedList<ProjectDto>> Handle(GetAllProjectsQuery request, CancellationToken cancellationToken)
@@ -36,7 +39,7 @@ public class GetAllProjectsQueryHandler : IRequestHandler<GetAllProjectsQuery, P
 
         var result = new PaginatedList<ProjectDto>
         {
-            Items = projects.Items.Select(p => new ProjectDto(p.Id, p.Name, p.Description, p.CreatedAt, p.Tasks.Count)),
+            Items = projects.Items.Select(p => _mapper.Map<ProjectDto>(p)),
             TotalCount = projects.TotalCount,
             PageNumber = projects.PageNumber,
             PageSize = projects.PageSize

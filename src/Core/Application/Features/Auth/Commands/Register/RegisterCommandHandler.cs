@@ -1,3 +1,4 @@
+using AutoMapper;
 using MediatR;
 using ProjectManagementAPI.Core.Application.Common.Exceptions;
 using ProjectManagementAPI.Core.Application.Common.Interfaces;
@@ -10,12 +11,14 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
     private readonly IUserRepository _userRepository;
     private readonly IPasswordService _passwordService;
     private readonly IJwtService _jwtService;
+    private readonly IMapper _mapper;
 
-    public RegisterCommandHandler(IUserRepository userRepository, IPasswordService passwordService, IJwtService jwtService)
+    public RegisterCommandHandler(IUserRepository userRepository, IPasswordService passwordService, IJwtService jwtService, IMapper mapper)
     {
         _userRepository = userRepository;
         _passwordService = passwordService;
         _jwtService = jwtService;
+        _mapper = mapper;
     }
 
     public async Task<AuthResponseDto> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -35,6 +38,6 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
         await _userRepository.AddAsync(user, cancellationToken);
 
         var token = _jwtService.GenerateToken(user);
-        return new AuthResponseDto(user.Id, user.FullName, user.Email, token, user.Role);
+        return _mapper.Map<AuthResponseDto>(user, opt => opt.AfterMap((src, dest) => dest.Token = token));
     }
 }

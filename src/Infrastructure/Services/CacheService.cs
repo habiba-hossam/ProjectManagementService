@@ -8,12 +8,9 @@ namespace ProjectManagementAPI.Infrastructure.Services;
 public class CacheService : ICacheService
 {
     private readonly IDistributedCache _cache;
-    private readonly ILogger<CacheService> _logger;
-
-    public CacheService(IDistributedCache cache, ILogger<CacheService> logger)
+    public CacheService(IDistributedCache cache)
     {
         _cache = cache;
-        _logger = logger;
     }
 
     public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
@@ -58,10 +55,6 @@ public class CacheService : ICacheService
     public async Task<int> GetVersionAsync(string key, CancellationToken cancellationToken = default)
     {
         var value = await _cache.GetStringAsync(key, cancellationToken);
- _logger.LogInformation(
-        "Cache version incremented. Key: {CacheKey}, version: {value},",key, value);
-
-
         return value is null ? 1 : int.Parse(value);
     }
 
@@ -69,9 +62,6 @@ public class CacheService : ICacheService
     {
         var current = await GetVersionAsync(key, cancellationToken);
         var newValue = current + 1;
- _logger.LogInformation(
-        "Cache version incremented. Key: {CacheKey}, OldVersion: {OldVersion}, NewVersion: {NewVersion}",
-        key, current, newValue);
         await _cache.SetStringAsync(key, newValue.ToString(),
             new DistributedCacheEntryOptions
             {

@@ -2,17 +2,29 @@ using ProjectManagementAPI.Core.Domain.Enums;
 
 namespace ProjectManagementAPI.Core.Application.Features.Tasks;
 
-public record TaskDto(
-    Guid Id,
-    string Title,
-    string Description,
-    ProjectTaskStatus Status,
-    string StatusLabel,
-    DateTime? DueDate,
-    TaskPriority Priority,
-    string PriorityLabel,
-    Guid ProjectId,
-    DateTime CreatedAt);
+public class TaskDto
+{
+    public Guid Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public ProjectTaskStatus Status { get; set; }
+    public string StatusLabel { get; set; } = string.Empty;
+    public DateTime? DueDate { get; set; }
+    public TaskPriority Priority { get; set; }
+    public string PriorityLabel { get; set; } = string.Empty;
+    public Guid ProjectId { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
 
-public record CreateTaskRequest(string Title, string Description, DateTime? DueDate, TaskPriority Priority);
-public record UpdateTaskStatusRequest(ProjectTaskStatus Status);
+public class CreateTaskRequest
+{
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public DateTime? DueDate { get; set; }
+    public TaskPriority Priority { get; set; }
+}
+
+public class UpdateTaskStatusRequest
+{
+    public ProjectTaskStatus Status { get; set; }
+}
